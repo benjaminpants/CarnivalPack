@@ -49,6 +49,8 @@ namespace CarnivalPack
         public float standardSpeed = 22f;
         public float speedVariance = 10f;
 
+        private float currentOffset = 0f;
+
         public Vector3 home;
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Cell homeCell;
@@ -80,7 +82,13 @@ namespace CarnivalPack
 
         public void MoveSpriteByAmount(float amount, float time)
         {
+            currentOffset += amount;
             StartCoroutine(MoveSpriteByAmountEnumerator(amount, time));
+        }
+
+        public void MoveSpriteToBase(float time)
+        {
+            MoveSpriteByAmount(-currentOffset, time);
         }
 
         public override void Initialize()
@@ -297,7 +305,7 @@ namespace CarnivalPack
             targetEnt.ExternalActivity.moveMods.Remove(moveMod);
             targetEnt.SetTrigger(true);
             SetLookerStateIfExists(true);
-            xorp.MoveSpriteByAmount(-2.75f, 3f);
+            xorp.MoveSpriteToBase(3f);
             //targetEnt.SetBaseRotation(0);
         }
 
@@ -504,6 +512,7 @@ namespace CarnivalPack
         public override void PlayerSighted(PlayerManager player)
         {
             base.PlayerSighted(player);
+            if (player.Tagged) return;
             xorp.Navigator.maxSpeed = 2.5f;
             xorp.Navigator.SetSpeed(2.5f);
         }
@@ -511,6 +520,14 @@ namespace CarnivalPack
         public override void PlayerInSight(PlayerManager player)
         {
             base.PlayerInSight(player);
+            if (player.Tagged)
+            {
+                if (xorp.Navigator.maxSpeed < 5f)
+                {
+                    PlayerLost(player);
+                }
+                return;
+            }
             if (xorp.currentTarget == player)
             {
                 xorp.behaviorStateMachine.CurrentNavigationState.UpdatePosition(player.transform.position);
@@ -566,6 +583,17 @@ namespace CarnivalPack
         public override void PlayerInSight(PlayerManager player)
         {
             base.PlayerSighted(player);
+            if (player.Tagged)
+            {
+                if (player == lastSeenPlayer)
+                {
+                    if (lastSeenPlayer != null)
+                    {
+                        PlayerLost(player);
+                    }
+                    return;
+                }
+            }
             lastSeenPlayer = player;
             playerSighted = true;
             timeSeeingPlayer += Time.deltaTime * xorp.ec.NpcTimeScale;

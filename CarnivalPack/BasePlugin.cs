@@ -66,10 +66,12 @@ namespace CarnivalPack
             animator.spriteRenderer = xorp.spriteRenderer[0];
             xorp.animator = animator;
 
-
-
             assetMan.Add<Xorplee>("Xorplee", xorp);
             NPCMetaStorage.Instance.Add(new NPCMetadata(this.Info, new NPC[] { xorp }, "Xorp", NPCFlags.Standard));
+            // create the door assets
+            StandardDoorMats doorMats = ObjectCreators.CreateDoorDataObject("XorpDoor", AssetLoader.TextureFromMod(this, "Map", "XorpDoor_Open.png"), AssetLoader.TextureFromMod(this, "Map", "XorpDoor_Closed.png"));
+
+
             // create the room asset
             Texture2D[] textures = Resources.FindObjectsOfTypeAll<Texture2D>();
             RoomAsset xorpRoom = ScriptableObject.CreateInstance<RoomAsset>();
@@ -78,7 +80,7 @@ namespace CarnivalPack
             xorpRoom.ceilTex = assetMan.Get<Texture2D>("XorpCeil");
             xorpRoom.florTex = assetMan.Get<Texture2D>("XorpFloor");
             xorpRoom.wallTex = assetMan.Get<Texture2D>("XorpWall");
-            xorpRoom.doorMats = Resources.FindObjectsOfTypeAll<StandardDoorMats>().Where(x => x.name == "DefaultDoorSet").First();
+            xorpRoom.doorMats = doorMats;
             xorpRoom.potentialDoorPositions = new List<IntVector2>() { new IntVector2(0, 0) };
             xorpRoom.cells.Add(new CellData()
             {
@@ -115,7 +117,7 @@ namespace CarnivalPack
             xorpRoom.eventSafeCells.Add(new IntVector2(0, 0));
             xorpRoom.eventSafeCells.Add(new IntVector2(0, 0));
             xorpRoom.lightPre = MTM101BaldiDevAPI.roomAssetMeta.Get("Room_ReflexOffice_0").value.lightPre;
-            xorpRoom.color = new Color(154f / 255f, 288f / 255f, 213f / 255f);
+            xorpRoom.color = new Color(172f / 255f, 0f, 252f / 255f);
             xorpRoom.category = xorpCat;
             assetMan.Add<RoomAsset>("Xorp_Room", xorpRoom);
             xorp.potentialRoomAssets = new WeightedRoomAsset[]
@@ -148,14 +150,15 @@ namespace CarnivalPack
             else if (floorName == "END")
             {
                 floorObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Xorplee"), weight = 75});
+                floorObject.items = floorObject.items.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 70 }).ToArray();
                 floorObject.MarkAsNeverUnload();
             }
-            if (floorName == "F1" || floorName == "F2" || floorName == "F3")
+            if (floorName.Contains("F"))
             {
-                floorObject.items = floorObject.items.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 60 }).ToArray();
+                floorObject.items = floorObject.items.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 80 }).ToArray();
                 floorObject.MarkAsNeverUnload();
             }
-            if (floorName == "F2" || floorName == "F3")
+            if (floorNumber >= 1)
             {
                 floorObject.shopItems = floorObject.shopItems.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 75 }).ToArray();
             }
