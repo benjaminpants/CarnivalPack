@@ -152,13 +152,14 @@ namespace CarnivalPack
             }
             if (floorName == "F1" || floorName == "F2" || floorName == "F3")
             {
-                floorObject.items = floorObject.items.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 100 }).ToArray();
+                floorObject.items = floorObject.items.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 60 }).ToArray();
                 floorObject.MarkAsNeverUnload();
             }
             if (floorName == "F2" || floorName == "F3")
             {
-                floorObject.shopItems = floorObject.shopItems.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 85 }).ToArray();
+                floorObject.shopItems = floorObject.shopItems.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 75 }).ToArray();
             }
+
         }
 
         void Awake()

@@ -19,7 +19,9 @@ namespace CarnivalPackEndlessCompat
         void GeneratorStuff(GeneratorData data)
         {
             NPC npc = NPCMetaStorage.Instance.Get(EnumExtensions.GetFromExtendedName<Character>("Zorp")).value;
-            data.npcs.Add(new WeightedNPC { selection = npc, weight = 95 });
+            ItemObject item = ItemMetaStorage.Instance.FindByEnum(EnumExtensions.GetFromExtendedName<Items>("CottonCandy")).value;
+            data.npcs.Add(new WeightedNPC { selection = npc, weight = 90 });
+            data.items.Add(new WeightedItemObject() { selection = item, weight = 60});
         }
 
         void Awake()
