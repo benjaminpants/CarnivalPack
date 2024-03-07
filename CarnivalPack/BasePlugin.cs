@@ -153,7 +153,7 @@ namespace CarnivalPack
                 floorObject.items = floorObject.items.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 70 }).ToArray();
                 floorObject.MarkAsNeverUnload();
             }
-            if (floorName.Contains("F"))
+            if (floorName.StartsWith("F"))
             {
                 floorObject.items = floorObject.items.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 80 }).ToArray();
                 floorObject.MarkAsNeverUnload();
@@ -161,6 +161,7 @@ namespace CarnivalPack
             if (floorNumber >= 1)
             {
                 floorObject.shopItems = floorObject.shopItems.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 75 }).ToArray();
+                floorObject.MarkAsNeverUnload();
             }
 
         }
