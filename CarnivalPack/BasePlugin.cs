@@ -5,6 +5,7 @@ using MTM101BaldAPI.AssetTools;
 using MTM101BaldAPI.Components;
 using MTM101BaldAPI.Reflection;
 using MTM101BaldAPI.Registers;
+using MTM101BaldAPI.SaveSystem;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +14,7 @@ using UnityEngine;
 
 namespace CarnivalPack
 {
-    [BepInPlugin("mtm101.rulerp.bbplus.carnivalpackroot", "Carnival Pack Root Mod", "0.0.0.0")]
+    [BepInPlugin("mtm101.rulerp.bbplus.carnivalpackroot", "Carnival Pack Root Mod", "1.0.0.0")]
     public class CarnivalPackBasePlugin : BaseUnityPlugin
     {
         public static CarnivalPackBasePlugin Instance;
@@ -188,6 +189,7 @@ namespace CarnivalPack
             LoadingEvents.RegisterOnAssetsLoaded(RegisterImportant, false);
             GeneratorManagement.Register(this, GenerationModType.Addend, AddNPCs);
             Instance = this;
+            ModdedSaveGame.AddSaveHandler(this.Info);
         }
     }
 }

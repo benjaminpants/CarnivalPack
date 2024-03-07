@@ -6,7 +6,7 @@ using System;
 
 namespace CarnivalPackEndlessCompat
 {
-    [BepInPlugin("mtm101.rulerp.bbplus.carnivalpackendless", "Carnival Pack Endless Compat", "0.0.0.0")]
+    [BepInPlugin("mtm101.rulerp.bbplus.carnivalpackendless", "Carnival Pack Endless Compat", "1.0.0.0")]
     [BepInDependency("mtm101.rulerp.baldiplus.endlessfloors")]
     public class CarnivalPackEndlessCompat : BaseUnityPlugin
     {
