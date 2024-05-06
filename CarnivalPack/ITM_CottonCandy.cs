@@ -1,4 +1,6 @@
 ﻿using AlmostEngine;
+using MTM101BaldAPI.Components;
+using MTM101BaldAPI.PlusExtensions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -27,14 +29,17 @@ namespace CarnivalPack
         public Sprite? originalStaminoSprite;
         public Image? staminoMeter;
         public PlayerManager? pm;
-        public float oldStaminaRise;
+        //public float oldStaminaRise;
+        ValueModifier staminaRaiseModifier = new ValueModifier(0f);
+        ValueModifier runSpeedModifier = new ValueModifier(1f, 5f);
+        ValueModifier walkSpeedModifier = new ValueModifier(1f, -6f);
         void Start()
         {
             pm = this.GetComponent<PlayerManager>();
-            oldStaminaRise = pm.plm.staminaRise;
-            pm.plm.staminaRise = 0f;
-            pm.plm.runSpeed += 5;
-            pm.plm.walkSpeed -= 6;
+            PlayerMovementStatModifier pmsm = pm.GetMovementStatModifier();
+            pmsm.AddModifier("staminaRise", staminaRaiseModifier);
+            pmsm.AddModifier("runSpeed", runSpeedModifier);
+            pmsm.AddModifier("walkSpeed", walkSpeedModifier);
         }
 
         void Update()
@@ -46,9 +51,9 @@ namespace CarnivalPack
             }
             if (pm.plm.stamina <= 0f)
             {
-                pm.plm.staminaRise = oldStaminaRise;
-                pm.plm.runSpeed -= 5;
-                pm.plm.walkSpeed += 6;
+                pm.GetMovementStatModifier().RemoveModifier(staminaRaiseModifier);
+                pm.GetMovementStatModifier().RemoveModifier(runSpeedModifier);
+                pm.GetMovementStatModifier().RemoveModifier(walkSpeedModifier);
                 staminoMeter.sprite = originalStaminoSprite;
                 Destroy(this);
             }

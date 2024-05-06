@@ -45,7 +45,7 @@ namespace CarnivalPack
 
         bool tractorBlink = true;
 
-        public float cooldownTime = 15f;
+        public float cooldownTime = 20f;
         public float standardSpeed = 22f;
         public float speedVariance = 10f;
 
@@ -397,6 +397,7 @@ namespace CarnivalPack
         public MovementModifier moveMod = new MovementModifier(Vector3.zero, 0.96f);
         // todo: figure out this stupid mask!!
         public LayerMask myMask = ~LayerMask.GetMask("Ignore Raycast B", "Ignore Raycast");//new LayerMask() { value = 2195457 };
+        public LayerMask myMaskIgnoreEntities = ~LayerMask.GetMask("Ignore Raycast B", "Ignore Raycast", "Player", "NPCs", "StandardEntities");//new LayerMask() { value = 2195457 };
 
         private Vector3 lastPosition = Vector3.zero;
 
@@ -531,7 +532,14 @@ namespace CarnivalPack
             if (xorp.currentTarget == player)
             {
                 xorp.behaviorStateMachine.CurrentNavigationState.UpdatePosition(player.transform.position);
-                lastPosition = player.transform.position;
+                if (Physics.SphereCast(player.transform.position, 0.6f, player.transform.position - xorp.transform.position, out info, float.MaxValue, myMaskIgnoreEntities.value, QueryTriggerInteraction.Ignore))
+                {
+                    lastPosition = info.point;
+                }
+                else
+                {
+                    lastPosition = player.transform.position;
+                }
                 timeWithoutSeeingPlayer = 0f;
             }
         }

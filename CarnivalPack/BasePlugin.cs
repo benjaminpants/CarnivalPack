@@ -3,10 +3,12 @@ using HarmonyLib;
 using MTM101BaldAPI;
 using MTM101BaldAPI.AssetTools;
 using MTM101BaldAPI.Components;
+using MTM101BaldAPI.ObjectCreation;
 using MTM101BaldAPI.Reflection;
 using MTM101BaldAPI.Registers;
 using MTM101BaldAPI.SaveSystem;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,38 +46,12 @@ namespace CarnivalPack
 
         void RegisterImportant()
         {
-            Character xorpEnum = EnumExtensions.ExtendEnum<Character>("Zorp");
-            PosterObject xorpPoster = ObjectCreators.CreateCharacterPoster(AssetLoader.TextureFromMod(this, "kxorplee_poster.png"), "PST_PRI_Xorplee1", "PST_PRI_Xorplee2");
-            Xorplee xorp = ObjectCreators.CreateNPC<Xorplee>("Xorp", xorpEnum, xorpPoster, spawnableRooms: new RoomCategory[] { xorpCat }, usesHeatMap: false, hasLooker: true);
-            xorp.spriteRenderer[0].gameObject.transform.localPosition += Vector3.up;
-            xorp.audMan = xorp.GetComponent<AudioManager>();
-            xorp.wahahAudMan = xorp.gameObject.AddComponent<PropagatedAudioManager>();
-            xorp.wahahAudMan.ReflectionSetVariable("soundOnStart", new SoundObject[] { assetMan.Get<SoundObject>("Xorpee_Sound_Idle") });
-            xorp.wahahAudMan.ReflectionSetVariable("loopOnStart", true);
-            xorp.spriteRenderer[0].sprite = assetMan.Get<Sprite>("Xorplee_Idle");
-            xorp.discoverSounds.AddRange(new SoundObject[] { assetMan.Get<SoundObject>("Aud_Xorp_Discover1"), assetMan.Get<SoundObject>("Aud_Xorp_Discover2") });
-            xorp.lostSounds.AddRange(new SoundObject[] { assetMan.Get<SoundObject>("Aud_Xorp_Lost1"), assetMan.Get<SoundObject>("Aud_Xorp_Lost2"), assetMan.Get<SoundObject>("Aud_Xorp_Lost3") });
-            xorp.goodSubjectSounds.AddRange(new SoundObject[] { assetMan.Get<SoundObject>("Aud_Xorp_Correct1"), assetMan.Get<SoundObject>("Aud_Xorp_Correct2"), assetMan.Get<SoundObject>("Aud_Xorp_Correct3") });
-            xorp.badSubjectSounds.AddRange(new SoundObject[] { assetMan.Get<SoundObject>("Aud_Xorp_Wrong1"), assetMan.Get<SoundObject>("Aud_Xorp_Wrong2")});
-            xorp.jammedSounds.AddRange(new SoundObject[] { assetMan.Get<SoundObject>("Aud_Xorp_Jammed1"), assetMan.Get<SoundObject>("Aud_Xorp_Jammed2"), assetMan.Get<SoundObject>("Aud_Xorp_Jammed3"), assetMan.Get<SoundObject>("Aud_Xorp_Jammed4") });
-            xorp.doneSound = assetMan.Get<SoundObject>("Aud_Xorp_Done1");
-            xorp.escapeSound = assetMan.Get<SoundObject>("Aud_Xorp_Escape");
-            xorp.ReflectionSetVariable("ignorePlayerOnSpawn", true);
 
-            // ANIMATOR!
-            CustomSpriteAnimator animator = xorp.gameObject.AddComponent<CustomSpriteAnimator>();
-            animator.spriteRenderer = xorp.spriteRenderer[0];
-            xorp.animator = animator;
-
-            assetMan.Add<Xorplee>("Xorplee", xorp);
-            NPCMetaStorage.Instance.Add(new NPCMetadata(this.Info, new NPC[] { xorp }, "Xorp", NPCFlags.Standard));
-            // create the door assets
             StandardDoorMats doorMats = ObjectCreators.CreateDoorDataObject("XorpDoor", AssetLoader.TextureFromMod(this, "Map", "XorpDoor_Open.png"), AssetLoader.TextureFromMod(this, "Map", "XorpDoor_Closed.png"));
-
-
             // create the room asset
             Texture2D[] textures = Resources.FindObjectsOfTypeAll<Texture2D>();
             RoomAsset xorpRoom = ScriptableObject.CreateInstance<RoomAsset>();
+            xorpRoom.name = "Zorpster_Room";
             xorpRoom.hasActivity = false;
             xorpRoom.activity = new ActivityData();
             xorpRoom.ceilTex = assetMan.Get<Texture2D>("XorpCeil");
@@ -113,35 +89,64 @@ namespace CarnivalPack
                 pos = new IntVector2(2, 1),
                 type = 3
             });
-            xorpRoom.standardLightCells.Add(new IntVector2(0,0));
+            xorpRoom.standardLightCells.Add(new IntVector2(0, 0));
             xorpRoom.entitySafeCells.Add(new IntVector2(2, 1));
             xorpRoom.eventSafeCells.Add(new IntVector2(0, 0));
             xorpRoom.eventSafeCells.Add(new IntVector2(0, 0));
             xorpRoom.lightPre = MTM101BaldiDevAPI.roomAssetMeta.Get("Room_ReflexOffice_0").value.lightPre;
             xorpRoom.color = new Color(172f / 255f, 0f, 252f / 255f);
             xorpRoom.category = xorpCat;
+            MTM101BaldiDevAPI.roomAssetMeta.Add(new RoomAssetMeta(this.Info, xorpRoom));
             assetMan.Add<RoomAsset>("Xorp_Room", xorpRoom);
-            xorp.potentialRoomAssets = new WeightedRoomAsset[]
-            {
-                new WeightedRoomAsset()
-                {
-                    selection = xorpRoom,
-                    weight = 100
-                }
-            };
 
-            Items cottonEnum = EnumExtensions.ExtendEnum<Items>("CottonCandy");
-            ItemObject cottonCandy = ObjectCreators.CreateItemObject("Itm_CottonCandy", "Desc_CottonCandy", assetMan.Get<Sprite>("CottonCandySmall"), assetMan.Get<Sprite>("CottonCandyBig"), cottonEnum, 160, 40);
-            ITM_CottonCandy candy = new GameObject().AddComponent<ITM_CottonCandy>();
-            cottonCandy.item = candy;
+
+            Xorplee xorp = new NPCBuilder<Xorplee>(Info)
+                .SetName("Xorp")
+                .SetEnum("Zorp")
+                .IgnoreBelts()
+                .SetAirborne()
+                .IgnorePlayerOnSpawn()
+                .AddLooker()
+                .AddTrigger()
+                .AddSpawnableRoomCategories(xorpCat)
+                .AddPotentialRoomAsset(xorpRoom, 100)
+                .SetPoster(AssetLoader.TextureFromMod(this, "kxorplee_poster.png"), "PST_PRI_Xorplee1", "PST_PRI_Xorplee2")
+                .Build();
+
+            xorp.spriteRenderer[0].gameObject.transform.localPosition += Vector3.up;
+            xorp.audMan = xorp.GetComponent<AudioManager>();
+            xorp.wahahAudMan = xorp.gameObject.AddComponent<PropagatedAudioManager>();
+            xorp.wahahAudMan.ReflectionSetVariable("soundOnStart", new SoundObject[] { assetMan.Get<SoundObject>("Xorpee_Sound_Idle") });
+            xorp.wahahAudMan.ReflectionSetVariable("loopOnStart", true);
+            xorp.spriteRenderer[0].sprite = assetMan.Get<Sprite>("Xorplee_Idle");
+            xorp.discoverSounds.AddRange(new SoundObject[] { assetMan.Get<SoundObject>("Aud_Xorp_Discover1"), assetMan.Get<SoundObject>("Aud_Xorp_Discover2") });
+            xorp.lostSounds.AddRange(new SoundObject[] { assetMan.Get<SoundObject>("Aud_Xorp_Lost1"), assetMan.Get<SoundObject>("Aud_Xorp_Lost2"), assetMan.Get<SoundObject>("Aud_Xorp_Lost3") });
+            xorp.goodSubjectSounds.AddRange(new SoundObject[] { assetMan.Get<SoundObject>("Aud_Xorp_Correct1"), assetMan.Get<SoundObject>("Aud_Xorp_Correct2"), assetMan.Get<SoundObject>("Aud_Xorp_Correct3") });
+            xorp.badSubjectSounds.AddRange(new SoundObject[] { assetMan.Get<SoundObject>("Aud_Xorp_Wrong1"), assetMan.Get<SoundObject>("Aud_Xorp_Wrong2")});
+            xorp.jammedSounds.AddRange(new SoundObject[] { assetMan.Get<SoundObject>("Aud_Xorp_Jammed1"), assetMan.Get<SoundObject>("Aud_Xorp_Jammed2"), assetMan.Get<SoundObject>("Aud_Xorp_Jammed3"), assetMan.Get<SoundObject>("Aud_Xorp_Jammed4") });
+            xorp.doneSound = assetMan.Get<SoundObject>("Aud_Xorp_Done1");
+            xorp.escapeSound = assetMan.Get<SoundObject>("Aud_Xorp_Escape");
+
+            // ANIMATOR!
+            CustomSpriteAnimator animator = xorp.gameObject.AddComponent<CustomSpriteAnimator>();
+            animator.spriteRenderer = xorp.spriteRenderer[0];
+            xorp.animator = animator;
+
+            assetMan.Add<Xorplee>("Xorplee", xorp);
+
+            ItemObject cottonCandy = new ItemBuilder(Info)
+                .SetNameAndDescription("Itm_CottonCandy", "Desc_CottonCandy")
+                .SetSprites(assetMan.Get<Sprite>("CottonCandySmall"), assetMan.Get<Sprite>("CottonCandyBig"))
+                .SetEnum("CottonCandy")
+                .SetShopPrice(160)
+                .SetGeneratorCost(40)
+                .SetItemComponent<ITM_CottonCandy>()
+                .SetMeta(ItemFlags.Persists, new string[0])
+                .Build();
             assetMan.Add<ItemObject>("CottonCandy", cottonCandy);
-            candy.gameObject.name = "CottonCandy Object";
-            ItemMetaData meta = new ItemMetaData(this.Info, cottonCandy);
-            cottonCandy.AddMeta(meta);
-            DontDestroyOnLoad(candy.gameObject);
         }
 
-        void AddNPCs(string floorName, int floorNumber, LevelObject floorObject)
+        void AddNPCs(string floorName, int floorNumber, CustomLevelObject floorObject)
         {
             if (floorName == "F1")
             {
@@ -151,12 +156,12 @@ namespace CarnivalPack
             else if (floorName == "END")
             {
                 floorObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Xorplee"), weight = 75});
-                floorObject.items = floorObject.items.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 70 }).ToArray();
+                floorObject.potentialItems = floorObject.potentialItems.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 70 }).ToArray();
                 floorObject.MarkAsNeverUnload();
             }
             if (floorName.StartsWith("F"))
             {
-                floorObject.items = floorObject.items.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 80 }).ToArray();
+                floorObject.potentialItems = floorObject.potentialItems.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 80 }).ToArray();
                 floorObject.MarkAsNeverUnload();
             }
             if (floorNumber >= 1)
@@ -165,6 +170,16 @@ namespace CarnivalPack
                 floorObject.MarkAsNeverUnload();
             }
 
+        }
+
+        IEnumerator PreLoadBulk()
+        {
+            yield return 2;
+            yield return "Loading Zorpster Sprites...";
+            AddSpriteFolderToAssetMan("", 40f, AssetLoader.GetModPath(this), "XorpAnim");
+            yield return "Loading Zorpster Audio...";
+            AddAudioFolderToAssetMan(new Color(107f / 255f, 193f / 255f, 27 / 255f), AssetLoader.GetModPath(this), "XorpLines");
+            yield break;
         }
 
         void Awake()
@@ -184,9 +199,10 @@ namespace CarnivalPack
             assetMan.Add<Sprite>("CottonCandySmall", AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "CottonCandySmall.png"), 25f));
             assetMan.Add<Sprite>("CottonCandyBig", AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "CottonCandyBig.png"), 50f));
             assetMan.Add<Sprite>("Staminometer_Cotton", AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Staminometer_Cotton.png"), 50f));
-            AddSpriteFolderToAssetMan("", 40f, AssetLoader.GetModPath(this), "XorpAnim");
-            AddAudioFolderToAssetMan(new Color(107f/255f,193f/255f,27/255f), AssetLoader.GetModPath(this), "XorpLines");
-            LoadingEvents.RegisterOnAssetsLoaded(RegisterImportant, false);
+            //AddSpriteFolderToAssetMan("", 40f, AssetLoader.GetModPath(this), "XorpAnim");
+            //AddAudioFolderToAssetMan(new Color(107f/255f,193f/255f,27/255f), AssetLoader.GetModPath(this), "XorpLines");
+            LoadingEvents.RegisterOnAssetsLoaded(Info, RegisterImportant, false);
+            LoadingEvents.RegisterOnLoadingScreenStart(Info, PreLoadBulk());
             GeneratorManagement.Register(this, GenerationModType.Addend, AddNPCs);
             Instance = this;
             ModdedSaveGame.AddSaveHandler(this.Info);
