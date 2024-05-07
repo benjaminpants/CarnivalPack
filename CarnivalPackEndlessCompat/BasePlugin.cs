@@ -26,7 +26,7 @@ namespace CarnivalPackEndlessCompat
 
         void Awake()
         {
-            LoadingEvents.RegisterOnAssetsLoaded(RegisterImportant, true);
+            LoadingEvents.RegisterOnAssetsLoaded(Info, RegisterImportant, true);
         }
     }
 }
