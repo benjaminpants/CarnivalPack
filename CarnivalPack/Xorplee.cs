@@ -37,7 +37,7 @@ namespace CarnivalPack
         public float timeBeforeNoSeeGiveUp = 10f;
         public float startSuckPower = 7f;
         public float endSuckPower = 36f;
-        public float timeToReachMax = 24f;
+        public float timeToReachMax = 26f;
 
         public int pointsToReward = 25;
 
@@ -45,12 +45,13 @@ namespace CarnivalPack
 
         bool tractorBlink = true;
 
-        public float cooldownTime = 20f;
+        public float cooldownTime = 25f;
         public float standardSpeed = 22f;
         public float speedVariance = 10f;
 
         private float currentOffset = 0f;
 
+        public Vector3 spriteStartingPosition;
         public Vector3 home;
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Cell homeCell;
@@ -65,25 +66,34 @@ namespace CarnivalPack
             }
         }
 
-        private IEnumerator MoveSpriteByAmountEnumerator(float amount, float time)
+        IEnumerator? currentAnimEnumerator;
+
+        private IEnumerator UpdateSpritePositionEnumerator(float time)
         {
             float passed = 0f;
-            Vector3 endPos = this.spriteRenderer[0].gameObject.transform.localPosition + (Vector3.up * amount);
+            Vector3 startPos = spriteRenderer[0].gameObject.transform.localPosition;
+            Vector3 endPos = spriteStartingPosition + (Vector3.up * currentOffset);
             while (passed < time)
             {
                 float delta = Time.deltaTime * ec.NpcTimeScale;
                 passed += delta;
-                this.spriteRenderer[0].gameObject.transform.localPosition += (Vector3.up * ((amount / time) * delta));
+                this.spriteRenderer[0].gameObject.transform.localPosition = Vector3.Lerp(startPos, endPos, passed / time);//+= (Vector3.up * ((amount / time) * delta));
                 yield return null;
             }
             this.spriteRenderer[0].gameObject.transform.localPosition = endPos;
+            currentAnimEnumerator = null;
             yield break;
         }
 
         public void MoveSpriteByAmount(float amount, float time)
         {
             currentOffset += amount;
-            StartCoroutine(MoveSpriteByAmountEnumerator(amount, time));
+            if (currentAnimEnumerator != null)
+            {
+                StopCoroutine(currentAnimEnumerator);
+            }
+            currentAnimEnumerator = UpdateSpritePositionEnumerator(time);
+            StartCoroutine(currentAnimEnumerator);
         }
 
         public void MoveSpriteToBase(float time)
@@ -94,7 +104,7 @@ namespace CarnivalPack
         public override void Initialize()
         {
             base.Initialize();
-            this.behaviorStateMachine.ChangeState(new Xorplee_Wander(this));
+            spriteStartingPosition = spriteRenderer[0].gameObject.transform.localPosition;
             home = transform.position;
             homeCell = ec.CellFromPosition(home);
             myEnt = this.GetComponent<Entity>();
@@ -143,6 +153,7 @@ namespace CarnivalPack
                     new CustomAnimationFrame<Sprite>(CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract4"), 0.05f)
             }));
             animator.SetDefaultAnimation("Idle", 1f);
+            this.behaviorStateMachine.ChangeState(new Xorplee_Wander(this));
         }
 
         public void BeginSuck(PlayerManager player)

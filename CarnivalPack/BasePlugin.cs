@@ -16,7 +16,7 @@ using UnityEngine;
 
 namespace CarnivalPack
 {
-    [BepInPlugin("mtm101.rulerp.bbplus.carnivalpackroot", "Carnival Pack Root Mod", "1.0.0.1")]
+    [BepInPlugin("mtm101.rulerp.bbplus.carnivalpackroot", "Carnival Pack Root Mod", "1.1.0.0")]
     public class CarnivalPackBasePlugin : BaseUnityPlugin
     {
         public static CarnivalPackBasePlugin Instance;
@@ -138,7 +138,7 @@ namespace CarnivalPack
                 .SetNameAndDescription("Itm_CottonCandy", "Desc_CottonCandy")
                 .SetSprites(assetMan.Get<Sprite>("CottonCandySmall"), assetMan.Get<Sprite>("CottonCandyBig"))
                 .SetEnum("CottonCandy")
-                .SetShopPrice(160)
+                .SetShopPrice(480)
                 .SetGeneratorCost(40)
                 .SetItemComponent<ITM_CottonCandy>()
                 .SetMeta(ItemFlags.Persists, new string[0])
