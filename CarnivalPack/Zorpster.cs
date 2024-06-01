@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace CarnivalPack
 {
-    public class Xorplee : NPC
+    public class Zorpster : NPC
     {
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -121,14 +121,14 @@ namespace CarnivalPack
             }
             animator.animations = CarnivalPackBasePlugin.Instance.zorpsterAnimations;
             animator.SetDefaultAnimation("Idle", 1f);
-            this.behaviorStateMachine.ChangeState(new Xorplee_Wander(this));
+            this.behaviorStateMachine.ChangeState(new Zorpster_Wander(this));
         }
 
         public void BeginSuck(PlayerManager player)
         {
             currentTarget = player;
             PlayRandomSound(discoverSounds);
-            behaviorStateMachine.ChangeState(new Xorplee_Suck(this));
+            behaviorStateMachine.ChangeState(new Zorpster_Suck(this));
             animator.Play("Tract", 1f);
             animator.SetDefaultAnimation("TractIdle",1f);
         }
@@ -143,7 +143,7 @@ namespace CarnivalPack
         public void EndSuck() 
         {
             PlayRandomSound(lostSounds);
-            behaviorStateMachine.ChangeState(new Xorplee_Wander(this));
+            behaviorStateMachine.ChangeState(new Zorpster_Wander(this));
             currentTarget = null;
             animator.Play("TractBack", 1f);
             animator.SetDefaultAnimation("Idle", 1f);
@@ -152,7 +152,7 @@ namespace CarnivalPack
         public void BecomeJammed()
         {
             PlayRandomSound(jammedSounds);
-            behaviorStateMachine.ChangeState(new Xorplee_Jammed(this));
+            behaviorStateMachine.ChangeState(new Zorpster_Jammed(this));
             animator.SetDefaultAnimation("Jammed", 1f);
         }
 
@@ -201,21 +201,21 @@ namespace CarnivalPack
         public void Carry(Entity ent, bool happy)
         {
             this.PlayRandomSound(happy ? goodSubjectSounds : badSubjectSounds);
-            behaviorStateMachine.ChangeState(new Xorplee_Carry(this, ent));
+            behaviorStateMachine.ChangeState(new Zorpster_Carry(this, ent));
         }
     }
 
-    public class Xorplee_StateBase : NpcState
+    public class Zorpster_StateBase : NpcState
     {
-        public Xorplee_StateBase(Xorplee xxorp) : base(xxorp)
+        public Zorpster_StateBase(Zorpster xZorp) : base(xZorp)
         {
-            xorp = xxorp;
+            Zorp = xZorp;
         }
 
-        protected Xorplee xorp;
+        protected Zorpster Zorp;
     }
 
-    public class Xorplee_Carry : Xorplee_StateBase
+    public class Zorpster_Carry : Zorpster_StateBase
     {
         protected Entity targetEnt;
 
@@ -223,21 +223,21 @@ namespace CarnivalPack
 
         private bool initLookerState;
 
-        public Xorplee_Carry(Xorplee xxorp, Entity ent) : base(xxorp)
+        public Zorpster_Carry(Zorpster xZorp, Entity ent) : base(xZorp)
         {
             targetEnt = ent;
             targetEnt.ExternalActivity.moveMods.Add(moveMod);
-            ent.gameObject.transform.position = xorp.transform.position;
-            xorp.animator.Play("TractBack", 1f);
-            xorp.animator.SetDefaultAnimation("Idle", 1f);
-            xorp.MoveSpriteByAmount(2.75f, 1f);
+            ent.gameObject.transform.position = Zorp.transform.position;
+            Zorp.animator.Play("TractBack", 1f);
+            Zorp.animator.SetDefaultAnimation("Idle", 1f);
+            Zorp.MoveSpriteByAmount(2.75f, 1f);
             //ent.SetBaseRotation(90);
         }
 
         public override void Enter()
         {
             base.Enter();
-            base.ChangeNavigationState(new NavigationState_TargetPosition(xorp, 63, xorp.home));
+            base.ChangeNavigationState(new NavigationState_TargetPosition(Zorp, 63, Zorp.home));
             Looker look = targetEnt.GetComponent<Looker>();
             if (look != null)
             {
@@ -263,8 +263,8 @@ namespace CarnivalPack
         public override void Update()
         {
             base.Update();
-            xorp.UpdateMoveSpeed(1.25f);
-            moveMod.movementAddend = xorp.Navigator.Velocity.normalized * xorp.Navigator.speed * xorp.Navigator.Am.Multiplier;
+            Zorp.UpdateMoveSpeed(1.25f);
+            moveMod.movementAddend = Zorp.Navigator.Velocity.normalized * Zorp.Navigator.speed * Zorp.Navigator.Am.Multiplier;
         }
 
         public override void OnStateTriggerExit(Collider other)
@@ -272,9 +272,9 @@ namespace CarnivalPack
             base.OnStateTriggerExit(other);
             if (other.GetComponent<Entity>() == targetEnt)
             {
-                base.ChangeNavigationState(new NavigationState_WanderRandom(xorp, 0));
-                xorp.audMan.PlaySingle(xorp.escapeSound);
-                xorp.behaviorStateMachine.ChangeState(new Xorplee_Wait(xorp, 2f));
+                base.ChangeNavigationState(new NavigationState_WanderRandom(Zorp, 0));
+                Zorp.audMan.PlaySingle(Zorp.escapeSound);
+                Zorp.behaviorStateMachine.ChangeState(new Zorpster_Wait(Zorp, 2f));
             }
         }
 
@@ -284,78 +284,78 @@ namespace CarnivalPack
             targetEnt.ExternalActivity.moveMods.Remove(moveMod);
             targetEnt.SetTrigger(true);
             SetLookerStateIfExists(true);
-            xorp.MoveSpriteToBase(3f);
+            Zorp.MoveSpriteToBase(3f);
             //targetEnt.SetBaseRotation(0);
         }
 
         public override void DestinationEmpty()
         {
             base.DestinationEmpty();
-            if (!xorp.IsHome)
+            if (!Zorp.IsHome)
             {
-                xorp.behaviorStateMachine.CurrentNavigationState.UpdatePosition(xorp.home);
+                Zorp.behaviorStateMachine.CurrentNavigationState.UpdatePosition(Zorp.home);
                 return;
             }
-            xorp.audMan.PlaySingle(xorp.doneSound);
+            Zorp.audMan.PlaySingle(Zorp.doneSound);
             if (targetEnt.GetType() == typeof(PlayerEntity))
             {
-                Singleton<CoreGameManager>.Instance.AddPoints(xorp.pointsToReward, targetEnt.GetComponent<PlayerManager>().playerNumber, true);
-                xorp.pointsToReward += 5;
+                Singleton<CoreGameManager>.Instance.AddPoints(Zorp.pointsToReward, targetEnt.GetComponent<PlayerManager>().playerNumber, true);
+                Zorp.pointsToReward += 5;
             }
-            xorp.behaviorStateMachine.ChangeState(new Xorplee_Wait(xorp, xorp.cooldownTime));
+            Zorp.behaviorStateMachine.ChangeState(new Zorpster_Wait(Zorp, Zorp.cooldownTime));
         }
     }
 
-    public class Xorplee_Jammed : Xorplee_StateBase
+    public class Zorpster_Jammed : Zorpster_StateBase
     {
 
-        public Xorplee_Jammed(Xorplee xxorp) : base(xxorp)
+        public Zorpster_Jammed(Zorpster xZorp) : base(xZorp)
         {
         }
 
         public override void Enter()
         {
             base.Enter();
-            base.ChangeNavigationState(new NavigationState_TargetPosition(xorp, 63, xorp.home));
-            xorp.animator.SetDefaultAnimation("Jammed", 1f);
+            base.ChangeNavigationState(new NavigationState_TargetPosition(Zorp, 63, Zorp.home));
+            Zorp.animator.SetDefaultAnimation("Jammed", 1f);
         }
 
         public override void Update()
         {
             base.Update();
-            xorp.UpdateMoveSpeed(0.95f);
+            Zorp.UpdateMoveSpeed(0.95f);
         }
 
         public override void DestinationEmpty()
         {
             base.DestinationEmpty();
-            if (!xorp.IsHome)
+            if (!Zorp.IsHome)
             {
-                xorp.behaviorStateMachine.CurrentNavigationState.UpdatePosition(xorp.home);
+                Zorp.behaviorStateMachine.CurrentNavigationState.UpdatePosition(Zorp.home);
                 return;
             }
-            //xorp.audMan.PlaySingle(xorp.doneSound);
-            xorp.behaviorStateMachine.ChangeState(new Xorplee_Wander(xorp));
+            //Zorp.audMan.PlaySingle(Zorp.doneSound);
+            Zorp.behaviorStateMachine.ChangeState(new Zorpster_Wander(Zorp));
         }
     }
 
-    public class Xorplee_Wait : Xorplee_Wander
+    public class Zorpster_Wait : Zorpster_Wander
     {
         public float remainingTime;
         public override float wanderMult => 0.8f;
-        public Xorplee_Wait(Xorplee xxorp, float time) : base(xxorp)
+        public Zorpster_Wait(Zorpster xZorp, float time) : base(xZorp)
         {
             remainingTime = time;
-            xorp.animator.Play("Idle", 1f);
+            Zorp.animator.Play("Idle", 1f);
         }
 
         public override void Update()
         {
             base.Update();
-            remainingTime -= Time.deltaTime * xorp.ec.NpcTimeScale;
+            remainingTime -= Time.deltaTime * Zorp.ec.NpcTimeScale;
             if (remainingTime <= 0f)
             {
-                xorp.behaviorStateMachine.ChangeState(new Xorplee_Wander(xorp));
+                Zorp.behaviorStateMachine.ChangeState(new Zorpster_Wander(Zorp));
             }
         }
 
@@ -367,7 +367,7 @@ namespace CarnivalPack
         }
     }
 
-    public class Xorplee_Suck : Xorplee_StateBase
+    public class Zorpster_Suck : Zorpster_StateBase
     {
         public float timeWithoutSeeingPlayer = 0f;
 
@@ -384,45 +384,45 @@ namespace CarnivalPack
 
         RaycastHit info;
 
-        public Xorplee_Suck(Xorplee xxorp) : base(xxorp)
+        public Zorpster_Suck(Zorpster xZorp) : base(xZorp)
         {
         }
 
         public override void Enter()
         {
             base.Enter();
-            if (xorp.currentTarget == null) throw new InvalidOperationException("Attempted to switch to Xorplee_Suck without target!");
-            base.ChangeNavigationState(new NavigationState_TargetPlayer(xorp, 63, xorp.currentTarget.transform.position));
-            lastPosition = xorp.currentTarget.transform.position;
-            xorp.Navigator.maxSpeed = 2.5f;
-            xorp.Navigator.SetSpeed(2.5f);
+            if (Zorp.currentTarget == null) throw new InvalidOperationException("Attempted to switch to Zorpster_Suck without target!");
+            base.ChangeNavigationState(new NavigationState_TargetPlayer(Zorp, 63, Zorp.currentTarget.transform.position));
+            lastPosition = Zorp.currentTarget.transform.position;
+            Zorp.Navigator.maxSpeed = 2.5f;
+            Zorp.Navigator.SetSpeed(2.5f);
         }
 
         public override void Update()
         {
             base.Update();
-            if (xorp.myEnt.Squished)
+            if (Zorp.myEnt.Squished)
             {
-                xorp.EndSuck();
+                Zorp.EndSuck();
                 return;
             }
-            timeWithoutSeeingPlayer += Time.deltaTime * xorp.ec.NpcTimeScale;
-            beamActiveTime += Time.deltaTime * xorp.ec.NpcTimeScale;
-            if (timeWithoutSeeingPlayer >= xorp.timeBeforeNoSeeGiveUp)
+            timeWithoutSeeingPlayer += Time.deltaTime * Zorp.ec.NpcTimeScale;
+            beamActiveTime += Time.deltaTime * Zorp.ec.NpcTimeScale;
+            if (timeWithoutSeeingPlayer >= Zorp.timeBeforeNoSeeGiveUp)
             {
-                xorp.EndSuck();
+                Zorp.EndSuck();
                 return;
             }
-            if (xorp.currentTarget == null) return;
+            if (Zorp.currentTarget == null) return;
             if (currentMoveModTarget == null)
             {
-                xorp.UpdateTractor(lastPosition);
+                Zorp.UpdateTractor(lastPosition);
             }
             else
             {
-                xorp.UpdateTractor(currentMoveModTarget.transform.position);
+                Zorp.UpdateTractor(currentMoveModTarget.transform.position);
             }
-            if (Physics.SphereCast(xorp.transform.position, 0.8f, lastPosition - xorp.transform.position, out info, float.MaxValue, myMask.value, QueryTriggerInteraction.Ignore))
+            if (Physics.SphereCast(Zorp.transform.position, 0.8f, lastPosition - Zorp.transform.position, out info, float.MaxValue, myMask.value, QueryTriggerInteraction.Ignore))
             {
                 if (!info.collider)
                 {
@@ -447,12 +447,12 @@ namespace CarnivalPack
             {
                 if ((otherEnt.gameObject.layer == LayerMask.NameToLayer("NPCs")) || (otherEnt.gameObject.layer == LayerMask.NameToLayer("Player")))
                 {
-                    xorp.Carry(otherEnt, otherEnt.GetComponent<PlayerManager>() != null);
+                    Zorp.Carry(otherEnt, otherEnt.GetComponent<PlayerManager>() != null);
                 }
                 else
                 {
-                    xorp.animator.Play("TractBack", 1f);
-                    xorp.BecomeJammed();
+                    Zorp.animator.Play("TractBack", 1f);
+                    Zorp.BecomeJammed();
                 }
             }    
         }
@@ -475,14 +475,14 @@ namespace CarnivalPack
                 currentMoveModTarget.ExternalActivity.moveMods.Add(moveMod);
             }
             if (currentMoveModTarget == null) return;
-            float suckPower = Mathf.Lerp(xorp.startSuckPower, xorp.endSuckPower, Mathf.Min(beamActiveTime / xorp.timeToReachMax, 1f));
-            moveMod.movementAddend = (currentMoveModTarget.transform.position - xorp.transform.position).normalized * -suckPower;
+            float suckPower = Mathf.Lerp(Zorp.startSuckPower, Zorp.endSuckPower, Mathf.Min(beamActiveTime / Zorp.timeToReachMax, 1f));
+            moveMod.movementAddend = (currentMoveModTarget.transform.position - Zorp.transform.position).normalized * -suckPower;
         }
 
         public override void Exit()
         {
             base.Exit();
-            xorp.UpdateTractor(null);
+            Zorp.UpdateTractor(null);
             if (currentMoveModTarget != null)
             {
                 currentMoveModTarget.ExternalActivity.moveMods.Remove(moveMod);
@@ -493,8 +493,8 @@ namespace CarnivalPack
         {
             base.PlayerSighted(player);
             if (player.Tagged) return;
-            xorp.Navigator.maxSpeed = 2.5f;
-            xorp.Navigator.SetSpeed(2.5f);
+            Zorp.Navigator.maxSpeed = 2.5f;
+            Zorp.Navigator.SetSpeed(2.5f);
         }
 
         public override void PlayerInSight(PlayerManager player)
@@ -502,16 +502,16 @@ namespace CarnivalPack
             base.PlayerInSight(player);
             if (player.Tagged)
             {
-                if (xorp.Navigator.maxSpeed < 5f)
+                if (Zorp.Navigator.maxSpeed < 5f)
                 {
                     PlayerLost(player);
                 }
                 return;
             }
-            if (xorp.currentTarget == player)
+            if (Zorp.currentTarget == player)
             {
-                xorp.behaviorStateMachine.CurrentNavigationState.UpdatePosition(player.transform.position);
-                if (Physics.SphereCast(player.transform.position, 0.6f, player.transform.position - xorp.transform.position, out info, float.MaxValue, myMaskIgnoreEntities.value, QueryTriggerInteraction.Ignore))
+                Zorp.behaviorStateMachine.CurrentNavigationState.UpdatePosition(player.transform.position);
+                if (Physics.SphereCast(player.transform.position, 0.6f, player.transform.position - Zorp.transform.position, out info, float.MaxValue, myMaskIgnoreEntities.value, QueryTriggerInteraction.Ignore))
                 {
                     lastPosition = info.point;
                 }
@@ -526,19 +526,19 @@ namespace CarnivalPack
         public override void PlayerLost(PlayerManager player)
         {
             base.PlayerLost(player);
-            xorp.Navigator.maxSpeed = 5f;
-            xorp.Navigator.SetSpeed(5f);
+            Zorp.Navigator.maxSpeed = 5f;
+            Zorp.Navigator.SetSpeed(5f);
         }
 
         public override void DestinationEmpty()
         {
             base.DestinationEmpty();
-            xorp.EndSuck();
-            base.ChangeNavigationState(new NavigationState_WanderRandom(xorp, 0));
+            Zorp.EndSuck();
+            base.ChangeNavigationState(new NavigationState_WanderRandom(Zorp, 0));
         }
     }
 
-    public class Xorplee_Wander : Xorplee_StateBase
+    public class Zorpster_Wander : Zorpster_StateBase
     {
 
         public float timeSeeingPlayer = 0f;
@@ -546,24 +546,24 @@ namespace CarnivalPack
         public bool playerSighted = false;
         public PlayerManager? lastSeenPlayer;
 
-        public Xorplee_Wander(Xorplee xxorp) : base(xxorp)
+        public Zorpster_Wander(Zorpster xZorp) : base(xZorp)
         {
         }
 
         public override void Enter()
         {
             base.Enter();
-            base.ChangeNavigationState(new NavigationState_WanderRandom(xorp, 0));
-            xorp.animator.SetDefaultAnimation("Idle", 1f);
+            base.ChangeNavigationState(new NavigationState_WanderRandom(Zorp, 0));
+            Zorp.animator.SetDefaultAnimation("Idle", 1f);
         }
 
         public override void Update()
         {
             base.Update();
-            xorp.UpdateMoveSpeed(wanderMult);
+            Zorp.UpdateMoveSpeed(wanderMult);
             if (!playerSighted)
             {
-                timeSeeingPlayer = Mathf.Max(0f, timeSeeingPlayer - Time.deltaTime * xorp.ec.NpcTimeScale);
+                timeSeeingPlayer = Mathf.Max(0f, timeSeeingPlayer - Time.deltaTime * Zorp.ec.NpcTimeScale);
             }
         }
 
@@ -583,10 +583,10 @@ namespace CarnivalPack
             }
             lastSeenPlayer = player;
             playerSighted = true;
-            timeSeeingPlayer += Time.deltaTime * xorp.ec.NpcTimeScale;
-            if ((timeSeeingPlayer >= xorp.timeRequiredToSeePlayer) && (!xorp.myEnt.Squished))
+            timeSeeingPlayer += Time.deltaTime * Zorp.ec.NpcTimeScale;
+            if ((timeSeeingPlayer >= Zorp.timeRequiredToSeePlayer) && (!Zorp.myEnt.Squished))
             {
-                xorp.BeginSuck(player);
+                Zorp.BeginSuck(player);
             }
         }
 
@@ -600,7 +600,7 @@ namespace CarnivalPack
         public override void DestinationEmpty()
         {
             base.DestinationEmpty();
-            base.ChangeNavigationState(new NavigationState_WanderRandom(xorp, 0));
+            base.ChangeNavigationState(new NavigationState_WanderRandom(Zorp, 0));
         }
     }
 }
