@@ -108,7 +108,7 @@ namespace CarnivalPack
             home = transform.position;
             homeCell = ec.CellFromPosition(home);
             myEnt = this.GetComponent<Entity>();
-            int tractorBeamCount = 13;
+            int tractorBeamCount = 15;
             tractorBeams = new SpriteRenderer[tractorBeamCount];
             for (int i = 0; i < tractorBeamCount; i++)
             {
@@ -171,11 +171,18 @@ namespace CarnivalPack
                 }
                 return;
             }
-            timeUntilTractorBlink -= Time.deltaTime * ec.NpcTimeScale;
-            if (timeUntilTractorBlink <= 0)
+            if (!Singleton<PlayerFileManager>.Instance.reduceFlashing)
             {
-                tractorBlink = !tractorBlink;
-                timeUntilTractorBlink = 0.02f;
+                timeUntilTractorBlink -= Time.deltaTime * ec.NpcTimeScale;
+                if (timeUntilTractorBlink <= 0)
+                {
+                    tractorBlink = !tractorBlink;
+                    timeUntilTractorBlink = 0.02f;
+                }
+            }
+            else
+            {
+                tractorBlink = true;
             }
             for (int i = 0; i < tractorBeams.Length; i++)
             {
