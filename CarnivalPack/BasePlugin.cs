@@ -2,6 +2,7 @@
 using HarmonyLib;
 using MTM101BaldAPI;
 using MTM101BaldAPI.AssetTools;
+using MTM101BaldAPI.AssetTools.SpriteSheets;
 using MTM101BaldAPI.Components;
 using MTM101BaldAPI.ObjectCreation;
 using MTM101BaldAPI.Reflection;
@@ -20,6 +21,8 @@ namespace CarnivalPack
     public class CarnivalPackBasePlugin : BaseUnityPlugin
     {
         public static CarnivalPackBasePlugin Instance;
+
+        public Dictionary<string, CustomAnimation<Sprite>> zorpsterAnimations;
 
         public AssetManager assetMan = new AssetManager();
 
@@ -176,7 +179,8 @@ namespace CarnivalPack
         {
             yield return 2;
             yield return "Loading Zorpster Sprites...";
-            AddSpriteFolderToAssetMan("", 40f, AssetLoader.GetModPath(this), "XorpAnim");
+            zorpsterAnimations = SpriteSheetLoader.LoadAsepriteAnimationsFromFile(Path.Combine(AssetLoader.GetModPath(this), "Zorpster.json"), 40f, Vector2.one / 2f);
+            //AddSpriteFolderToAssetMan("", 40f, AssetLoader.GetModPath(this), "XorpAnim");
             yield return "Loading Zorpster Audio...";
             AddAudioFolderToAssetMan(new Color(107f / 255f, 193f / 255f, 27 / 255f), AssetLoader.GetModPath(this), "XorpLines");
             yield break;

@@ -119,39 +119,7 @@ namespace CarnivalPack
                 clone.enabled = false;
                 tractorBeams[i] = clone;
             }
-            animator.animations.Add("Idle", new CustomAnimation<Sprite>(new Sprite[]
-            {
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_idle_1"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_idle_2"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_idle_3"),
-            }, 0.3f));
-            animator.animations.Add("Jammed", new CustomAnimation<Sprite>(new Sprite[]
-            {
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_jammed_1"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_jammed_2"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_jammed_3"),
-            }, 0.3f));
-            animator.animations.Add("Tract", new CustomAnimation<Sprite>(new Sprite[]
-            {
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract1"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract2"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract3"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract4"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract5"),
-            }, 1f));
-            animator.animations.Add("TractBack", new CustomAnimation<Sprite>(new Sprite[]
-            {
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract5"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract4"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract3"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract2"),
-                CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract1"),
-            }, 1f));
-            animator.animations.Add("TractIdle", new CustomAnimation<Sprite>(new CustomAnimationFrame<Sprite>[]
-            {
-                    new CustomAnimationFrame<Sprite>(CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract5"), 0.2f),
-                    new CustomAnimationFrame<Sprite>(CarnivalPackBasePlugin.Instance.assetMan.Get<Sprite>("xorp_tract4"), 0.05f)
-            }));
+            animator.animations = CarnivalPackBasePlugin.Instance.zorpsterAnimations;
             animator.SetDefaultAnimation("Idle", 1f);
             this.behaviorStateMachine.ChangeState(new Xorplee_Wander(this));
         }
