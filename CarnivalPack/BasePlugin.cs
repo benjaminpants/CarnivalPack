@@ -153,7 +153,7 @@ namespace CarnivalPack
         {
             if (floorName == "F1")
             {
-                floorObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Zorpster"), weight = 100 });
+                floorObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Zorpster"), weight = 115 });
                 floorObject.MarkAsNeverUnload();
             }
             else if (floorName == "END")
