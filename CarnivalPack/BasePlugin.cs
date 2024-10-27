@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using HarmonyLib;
 using MTM101BaldAPI;
 using MTM101BaldAPI.AssetTools;
@@ -24,6 +25,8 @@ namespace CarnivalPack
         public static CarnivalPackBasePlugin Instance;
 
         public Dictionary<string, CustomAnimation<Sprite>> zorpsterAnimations;
+
+        public ConfigEntry<bool> youtuberModeEnabled;
 
         public AssetManager assetMan = new AssetManager();
 
@@ -53,7 +56,6 @@ namespace CarnivalPack
 
             StandardDoorMats doorMats = ObjectCreators.CreateDoorDataObject("ZorpDoor", AssetLoader.TextureFromMod(this, "Map", "ZorpDoor_Open.png"), AssetLoader.TextureFromMod(this, "Map", "ZorpDoor_Closed.png"));
             // create the room asset
-            Texture2D[] textures = Resources.FindObjectsOfTypeAll<Texture2D>();
             RoomAsset ZorpRoom = ScriptableObject.CreateInstance<RoomAsset>();
             ZorpRoom.name = "Zorpster_Room";
             ZorpRoom.hasActivity = false;
@@ -150,28 +152,37 @@ namespace CarnivalPack
             assetMan.Add<ItemObject>("CottonCandy", cottonCandy);
         }
 
-        void AddNPCs(string floorName, int floorNumber, CustomLevelObject floorObject)
+        void AddNPCs(string floorName, int floorNumber, SceneObject sceneObject)
         {
-            if (floorName == "F1")
+            if (!youtuberModeEnabled.Value)
             {
-                floorObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Zorpster"), weight = 115 });
-                floorObject.MarkAsNeverUnload();
+                if (floorName == "F1")
+                {
+                    sceneObject.levelObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Zorpster"), weight = 100 });
+                    sceneObject.levelObject.MarkAsNeverUnload();
+                }
+                if (floorName == "F2")
+                {
+                    sceneObject.levelObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Zorpster"), weight = 25 }); // surprise zorpster
+                }
             }
-            else if (floorName == "END")
+            else
             {
-                floorObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Zorpster"), weight = 75});
-                floorObject.potentialItems = floorObject.potentialItems.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 70 }).ToArray();
-                floorObject.MarkAsNeverUnload();
+                if (floorName == "F1")
+                {
+                    sceneObject.levelObject.forcedNpcs = sceneObject.levelObject.forcedNpcs.AddToArray(assetMan.Get<NPC>("Zorpster"));
+                    sceneObject.levelObject.additionalNPCs = Mathf.Max(sceneObject.levelObject.additionalNPCs - 1, 0);
+                }
             }
             if (floorName.StartsWith("F"))
             {
-                floorObject.potentialItems = floorObject.potentialItems.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 80 }).ToArray();
-                floorObject.MarkAsNeverUnload();
+                sceneObject.levelObject.potentialItems = sceneObject.levelObject.potentialItems.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 80 }).ToArray();
+                sceneObject.MarkAsNeverUnload();
             }
             if (floorNumber >= 1)
             {
-                floorObject.shopItems = floorObject.shopItems.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 75 }).ToArray();
-                floorObject.MarkAsNeverUnload();
+                sceneObject.shopItems = sceneObject.shopItems.AddItem(new WeightedItemObject() { selection = assetMan.Get<ItemObject>("CottonCandy"), weight = 75 }).ToArray();
+                sceneObject.MarkAsNeverUnload();
             }
 
         }
@@ -210,7 +221,48 @@ namespace CarnivalPack
             LoadingEvents.RegisterOnLoadingScreenStart(Info, PreLoadBulk());
             GeneratorManagement.Register(this, GenerationModType.Addend, AddNPCs);
             Instance = this;
-            ModdedSaveGame.AddSaveHandler(this.Info);
+
+            youtuberModeEnabled = Config.Bind<bool>("General", "Youtuber Mode", false, "If true, Zorpster will always appear on Floor 1.");
+
+            ModdedSaveGame.AddSaveHandler(new CarnivalPackSaveGameIO());
+        }
+    }
+
+    public class CarnivalPackSaveGameIO : ModdedSaveGameIOBinary
+    {
+        public override PluginInfo pluginInfo => CarnivalPackBasePlugin.Instance.Info;
+
+        public override void Load(BinaryReader reader)
+        {
+            reader.ReadByte();
+        }
+
+        public override void Reset()
+        {
+            
+        }
+
+        public override void Save(BinaryWriter writer)
+        {
+            writer.Write((byte)0);
+        }
+
+        public override string[] GenerateTags()
+        {
+            if (CarnivalPackBasePlugin.Instance.youtuberModeEnabled.Value)
+            {
+                return new string[1] { "YoutuberMode" };
+            }
+            return new string[0];
+        }
+
+        public override string DisplayTags(string[] tags)
+        {
+            if (tags.Contains("YoutuberMode"))
+            {
+                return "Youtuber Mode";
+            }
+            return "Standard Mode";
         }
     }
 }
