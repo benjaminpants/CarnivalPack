@@ -109,7 +109,6 @@ namespace CarnivalPack
             Zorpster Zorp = new NPCBuilder<Zorpster>(Info)
                 .SetName("Zorpster")
                 .SetEnum("Zorp")
-                .IgnoreBelts()
                 .SetAirborne()
                 .IgnorePlayerOnSpawn()
                 .AddLooker()
