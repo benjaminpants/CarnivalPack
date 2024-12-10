@@ -49,6 +49,8 @@ namespace CarnivalPack
         public float standardSpeed = 22f;
         public float speedVariance = 10f;
 
+        public float nonPlayerSuckAddition = 8f;
+
         private float currentOffset = 0f;
 
         public Vector3 spriteStartingPosition;
@@ -483,6 +485,10 @@ namespace CarnivalPack
             }
             if (currentMoveModTarget == null) return;
             float suckPower = Mathf.Lerp(Zorp.startSuckPower, Zorp.endSuckPower, Mathf.Min(beamActiveTime / Zorp.timeToReachMax, 1f));
+            if (!(currentMoveModTarget is PlayerEntity))
+            {
+                suckPower += Zorp.nonPlayerSuckAddition;
+            }
             moveMod.movementAddend = (currentMoveModTarget.transform.position - Zorp.transform.position).normalized * -suckPower;
         }
 

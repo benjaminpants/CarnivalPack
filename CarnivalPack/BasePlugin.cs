@@ -157,20 +157,20 @@ namespace CarnivalPack
             {
                 if (floorName == "F1")
                 {
-                    sceneObject.levelObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Zorpster"), weight = 100 });
-                    sceneObject.levelObject.MarkAsNeverUnload();
+                    sceneObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Zorpster"), weight = 100 });
+                    sceneObject.MarkAsNeverUnload();
                 }
                 if (floorName == "F2")
                 {
-                    sceneObject.levelObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Zorpster"), weight = 25 }); // surprise zorpster
+                    sceneObject.potentialNPCs.Add(new WeightedNPC() { selection = assetMan.Get<NPC>("Zorpster"), weight = 25 }); // surprise zorpster
                 }
             }
             else
             {
                 if (floorName == "F1")
                 {
-                    sceneObject.levelObject.forcedNpcs = sceneObject.levelObject.forcedNpcs.AddToArray(assetMan.Get<NPC>("Zorpster"));
-                    sceneObject.levelObject.additionalNPCs = Mathf.Max(sceneObject.levelObject.additionalNPCs - 1, 0);
+                    sceneObject.forcedNpcs = sceneObject.levelObject.forcedNpcs.AddToArray(assetMan.Get<NPC>("Zorpster"));
+                    sceneObject.additionalNPCs = Mathf.Max(sceneObject.levelObject.additionalNPCs - 1, 0);
                 }
             }
             if (floorName.StartsWith("F"))
