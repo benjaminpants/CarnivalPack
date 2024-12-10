@@ -19,7 +19,7 @@ using UnityEngine;
 namespace CarnivalPack
 {
     [BepInDependency("mtm101.rulerp.bbplus.baldidevapi")]
-    [BepInPlugin("mtm101.rulerp.bbplus.carnivalpackroot", "Carnival Pack Root Mod", "1.3.0.0")]
+    [BepInPlugin("mtm101.rulerp.bbplus.carnivalpackroot", "Carnival Pack Root Mod", "1.4.0.0")]
     public class CarnivalPackBasePlugin : BaseUnityPlugin
     {
         public static CarnivalPackBasePlugin Instance;
